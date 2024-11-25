@@ -12,25 +12,18 @@ app.use(cors());
 app.use(express.json({ limit: '100mb' })); // Allow parsing JSON with large payloads
 app.use(express.urlencoded({ extended: true, limit: '100mb' })); // Allow parsing URL-encoded data with large payloads
 
+app.use((req, res, next) => {
+    const contentLength = req.headers['content-length'] || 0;
+    console.log(`Request size: ${contentLength} bytes`);
+    next();
+});
+
 const PORT = process.env.PORT || 3000;
 
 // Ensure 'uploads' directory exists
 if (!fs.existsSync('uploads')) {
     fs.mkdirSync('uploads');
 }
-
-// Set up multer for file storage
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/'); // Directory where files will be saved
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, `${uniqueSuffix}-${file.originalname}`); // Rename file with unique suffix
-    },
-});
-
-const upload = multer({ storage });
 
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Welcome to the API' });
@@ -100,14 +93,8 @@ app.post('/upload-base64', async (req, res) => {
     }
 });
 
-// Serve uploaded files
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 // Error handling middleware
 app.use((err, req, res, next) => {
-    if (err instanceof multer.MulterError) {
-        return res.status(400).json({ message: 'Multer Error', error: err.message });
-    }
     res.status(500).json({ message: 'Unknown Error', error: err.message });
 });
 
