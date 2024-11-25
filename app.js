@@ -32,6 +32,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+app.get('/', (req, res) => {
+    res.status(200).json({ message: 'Welcome to the API' });
+})
+
 app.post('/upload-base64', async (req, res) => {
     try {
         const { file, filename, token } = req.body;
