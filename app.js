@@ -9,7 +9,7 @@ const FormData = require('form-data');
 // Initialize express app
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: '10mb' })); // Allow parsing JSON with large payloads
+app.use(express.json({ limit: '100mb' })); // Allow parsing JSON with large payloads
 app.use(express.urlencoded({ extended: true, limit: '100mb' })); // Allow parsing URL-encoded data with large payloads
 
 const PORT = process.env.PORT || 3000;
