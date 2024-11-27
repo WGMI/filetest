@@ -73,8 +73,10 @@ app.post('/upload-base64', async (req, res) => {
         };
 
         const externalApiResponse = await axios.post(externalApiUrl, formData, { headers });
+        console.log(externalApiResponse);
 
         const filteredResponse = {
+            id: externalApiResponse.data.id,
             destination: externalApiResponse.data.destination,
             path: externalApiResponse.data.path,
             fileName: externalApiResponse.data.fileName,
