@@ -61,7 +61,7 @@ app.post('/upload-base64', async (req, res) => {
         const base64Data = file.replace(/^data:.+;base64,/, '');
         fs.writeFileSync(filePath, base64Data, 'base64');
 
-        const externalApiUrl = 'https://hokela-core-mr8oi.ondigitalocean.app/document/u-space';
+        const externalApiUrl = 'https://hokela-api-9uucl.ondigitalocean.app/document/u-space';
         const formData = new FormData();
         formData.append('file', fs.createReadStream(filePath));
         formData.append('filename', filename);
