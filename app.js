@@ -1,5 +1,4 @@
 const express = require('express');
-const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 const axios = require('axios');
@@ -28,6 +27,52 @@ if (!fs.existsSync('uploads')) {
 app.get('/', (req, res) => {
     res.status(200).json({ message: 'Welcome to the API' });
 })
+
+app.post('/upload-audio', async (req, res) => {
+    try {
+        const { file, token, aiToken } = req.body;
+
+        if (!file || !token || !aiToken) {
+            return res.status(400).json({ 
+                message: 'Audio file, token, and OpenAI token are required' 
+            });
+        }
+
+        // Extract the base64 data and create a temporary file
+        const base64Data = file.replace(/^data:audio\/\w+;base64,/, '');
+        const audioFilePath = path.join(__dirname, 'uploads', `temp-${Date.now()}.mp3`);
+        fs.writeFileSync(audioFilePath, base64Data, 'base64');
+
+        // Create form data for OpenAI API
+        const formData = new FormData();
+        formData.append('file', fs.createReadStream(audioFilePath));
+        formData.append('model', 'whisper-1');
+
+        // Call OpenAI API for transcription
+        const openaiResponse = await axios.post(
+            'https://api.openai.com/v1/audio/transcriptions',
+            formData,
+            {
+                headers: {
+                    'Authorization': `${aiToken}`,
+                    ...formData.getHeaders(),
+                }
+            }
+        );
+
+        // Clean up the temporary file
+        fs.unlinkSync(audioFilePath);
+
+        res.status(200).json({
+            message: 'Audio transcribed successfully',
+            transcription: openaiResponse.data.text
+        });
+
+    } catch (error) {
+        console.error('Error:', error.message);
+        res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    }
+});
 
 app.post('/upload-base64', async (req, res) => {
     try {
